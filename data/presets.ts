@@ -95,5 +95,29 @@ export const JPOP_PRESETS: Preset[] = [
     style: 'Arcade game, techno, fast BPM, electronic, rhythmic, cyber, high energy, synthesizer',
     description_ja: 'ゲームセンターの熱気を想起させる高速テクノ。',
     description_en: 'High-speed techno reminiscent of the heat of an arcade.'
+  },
+  {
+    id: 'showa-kayou',
+    name_ja: '昭和歌謡',
+    name_en: 'Showa Kayou',
+    style: 'Showa Kayou, 70s Japanese Pop, nostalgic, orchestral pop, warm brass, emotional melody, vibraphone, clear vocals',
+    description_ja: '70-80年代の懐かしく温かい日本の歌謡曲スタイル。',
+    description_en: 'Nostalgic and warm Japanese Kayou style from the 70s-80s.'
+  },
+  {
+    id: 'heisei-pop',
+    name_ja: '平成ポップス',
+    name_en: 'Heisei Pop',
+    style: 'Heisei J-Pop, 90s/00s style, bright synthesizers, catchy chorus, optimistic, high energy, upbeat rhythm',
+    description_ja: '90-00年代の黄金期を彷彿とさせる、キャッチーで明るいJ-POP。',
+    description_en: 'Catchy and bright J-Pop reminiscent of the golden era in the 90s-00s.'
+  },
+  {
+    id: 'reiwa-modern',
+    name_ja: '令和最新ヒット風',
+    name_en: 'Reiwa Modern Hit',
+    style: 'Reiwa style, modern J-Pop, intricate arrangements, digital elements, high BPM, complex melodies, crisp production',
+    description_ja: 'SNSや動画サイトで流行している、高速で緻密な最新のJ-POP。',
+    description_en: 'High-speed, intricate modern J-Pop popular on SNS and video sites.'
   }
 ];
