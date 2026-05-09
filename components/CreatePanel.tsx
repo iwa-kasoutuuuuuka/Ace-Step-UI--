@@ -1689,10 +1689,10 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
                     <div className="flex items-center gap-1 bg-zinc-100 dark:bg-white/5 p-1 rounded-lg">
                       <button
                         onClick={analyzeLyrics}
-                        className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-pink-500 text-white hover:bg-pink-600 transition-colors mr-1 shadow-sm"
+                        className="px-2 py-0.5 rounded text-[9px] font-bold bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 transition-all mr-1 shadow-sm border border-white/10 active:scale-95"
                         title={language === 'ja' ? '歌詞からスタイル提案' : 'Suggest style from lyrics'}
                       >
-                        {language === 'ja' ? 'AI解析' : 'AI Analysis'}
+                        {language === 'ja' ? '✨ AI解析' : '✨ AI Analysis'}
                       </button>
                       {['Aメロ', 'Bメロ', 'サビ', '間奏'].map(tag => (
                         <button
