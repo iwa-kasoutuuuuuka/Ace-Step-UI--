@@ -16,17 +16,36 @@ if exist "%~dp0node\node.exe" (
 
 REM --- ACE-Stepのパスを確認 ---
 set CONFIG_FILE=.acestep_path
-set DEFAULT_PATH=..\ACE-Step-1.5
+set ENGINE_DIR=%~dp0engine
 
-if exist "%CONFIG_FILE%" (
+if exist "%ENGINE_DIR%\python_embeded\python.exe" (
+    set ACESTEP_PATH=%ENGINE_DIR%
+) else if exist "%CONFIG_FILE%" (
     set /p ACESTEP_PATH=<"%CONFIG_FILE%"
 ) else (
-    set ACESTEP_PATH=%DEFAULT_PATH%
+    set ACESTEP_PATH=..\ACE-Step-1.5
 )
 
 :CHECK_PATH
 if not exist "%ACESTEP_PATH%" (
-    echo [!] ACE-Step 1.5 が見つかりません。
+    echo [!] ACE-Step 1.5（生成エンジン本体）が見つかりません。
+    echo.
+    echo [1] 自動ダウンロードを開始する (約5GB / 7z形式)
+    echo [2] 手動でフォルダを指定する (ドラッグ＆ドロップ)
+    echo.
+    set /p CHOICE="選択 (1 or 2): "
+    
+    if "!CHOICE!"=="1" (
+        echo [+] ダウンロードを開始します。完了までお待ちください...
+        powershell -ExecutionPolicy Bypass -File "%~dp0download_engine.ps1"
+        echo.
+        echo [!] ダウンロードが完了しました。
+        echo "%~dp0engine.7z" を解凍して、"engine" という名前にしてください。
+        pause
+        exit
+    )
+    
+    echo.
     echo ACE-Step 1.5 のフォルダをここにドラッグ＆ドロップしてください。
     set /p ACESTEP_PATH="パス: "
     set ACESTEP_PATH=!ACESTEP_PATH:"=!
