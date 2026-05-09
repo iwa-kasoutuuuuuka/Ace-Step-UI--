@@ -650,4 +650,31 @@ router.delete('/comments/:commentId', authMiddleware, async (req: AuthenticatedR
   }
 });
 
+// Export all songs metadata for backup
+router.get('/actions/export', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = await pool.query(
+      `SELECT s.*, COALESCE(u.username, 'Anonymous') as creator
+       FROM songs s
+       LEFT JOIN users u ON s.user_id = u.id
+       WHERE s.user_id = $1
+       ORDER BY s.created_at DESC`,
+      [req.user!.id]
+    );
+
+    const exportData = {
+      version: '1.0',
+      exported_at: new Date().toISOString(),
+      songs: result.rows
+    };
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename=acestep_library_export.json');
+    res.json(exportData);
+  } catch (error) {
+    console.error('Export library error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

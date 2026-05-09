@@ -4,7 +4,7 @@ import { GenerationParams, Song } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 import { generateApi } from '../services/api';
-import { MAIN_STYLES, JAPANESE_STYLES } from '../data/genres';
+import { MAIN_STYLES, JAPANESE_STYLES, JAPANESE_MOOD_TAGS } from '../data/genres';
 import { JPOP_PRESETS } from '../data/presets';
 import { JAPANESE_THEMES } from '../data/themes';
 import { EditableSlider } from './EditableSlider';
@@ -366,6 +366,37 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
     // Remove existing gender prefixes if any
     let newStyle = style.replace(/^(Male vocals|Female vocals|Vocaloid style, synthesized vocals), /i, '');
     setStyle(prefix + newStyle);
+  };
+
+  const setVocalStyle = (vStyle: string) => {
+    // Add vocal style tags like "shout", "whisper", etc.
+    if (!style.includes(vStyle)) {
+      setStyle(prev => prev ? `${prev}, ${vStyle}` : vStyle);
+    }
+  };
+
+  const insertStructure = (tag: string) => {
+    const textarea = document.querySelector('textarea[placeholder*="lyrics"]') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = lyrics;
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    
+    // Ensure newline if not at start
+    const prefix = before && !before.endsWith('\n') ? '\n' : '';
+    const newLyrics = before + prefix + `[${tag}]\n` + after;
+    
+    setLyrics(newLyrics);
+    
+    // Focus back and set cursor
+    setTimeout(() => {
+      textarea.focus();
+      const newPos = start + prefix.length + tag.length + 3;
+      textarea.setSelectionRange(newPos, newPos);
+    }, 10);
   };
 
   // Resize Logic
@@ -1611,6 +1642,20 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
                   >
                     {instrumental ? t('instrumental') : t('vocal')}
                   </button>
+                  {/* Structure Buttons */}
+                  {!instrumental && (
+                    <div className="flex items-center gap-1 bg-zinc-100 dark:bg-white/5 p-1 rounded-lg">
+                      {['Aメロ', 'Bメロ', 'サビ', '間奏'].map(tag => (
+                        <button
+                          key={tag}
+                          onClick={() => insertStructure(tag)}
+                          className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-pink-500 transition-colors border border-zinc-200 dark:border-white/5"
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <button
                     className={`p-1.5 hover:bg-zinc-200 dark:hover:bg-white/10 rounded transition-colors ${isFormattingLyrics ? 'text-pink-500' : 'text-zinc-500 hover:text-black dark:hover:text-white'}`}
                     title="AI Format - Enhance style & auto-fill parameters"
@@ -1745,6 +1790,33 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
                       </button>
                     ))}
                   </div>
+                  <div className="flex gap-1 ml-auto">
+                    {[
+                      { id: 'shout', label: '叫び', tag: 'shouting vocals' },
+                      { id: 'whisper', label: '囁き', tag: 'whispered vocals' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setVocalStyle(item.tag)}
+                        className="text-[8px] font-medium px-1.5 py-0.5 rounded bg-zinc-50 dark:bg-white/5 text-zinc-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Mood Tags (Japanese Edition) */}
+                <div className="flex flex-wrap gap-1.5 pb-1">
+                  {JAPANESE_MOOD_TAGS.map(tag => (
+                    <button
+                      key={tag}
+                      onClick={() => setStyle(prev => prev ? `${prev}, ${tag}` : tag)}
+                      className="text-[9px] font-bold bg-gradient-to-r from-zinc-50 to-zinc-100 dark:from-white/5 dark:to-white/10 hover:from-pink-500 hover:to-purple-600 hover:text-white text-zinc-600 dark:text-zinc-400 px-2 py-0.5 rounded-md transition-all border border-zinc-200 dark:border-white/5 shadow-sm"
+                    >
+                      {tag}
+                    </button>
+                  ))}
                 </div>
 
                 {/* Quick Tags */}

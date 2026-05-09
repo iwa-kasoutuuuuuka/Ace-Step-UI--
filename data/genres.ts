@@ -28,6 +28,10 @@ export const JAPANESE_STYLES = [
   'Shibuya-kei'
 ];
 
+export const JAPANESE_MOOD_TAGS = [
+  'エモい', '癒やし', '爆音', 'チルい', '懐かしい', 'アゲアゲ', '疾走感', '切ない', 'お洒落', 'ダーク'
+];
+
 // Backward-compatible alias
 export const GENRE_KEYS = MAIN_STYLES;
 

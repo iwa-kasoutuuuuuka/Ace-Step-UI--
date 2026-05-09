@@ -1,5 +1,5 @@
 import React from 'react';
-import { Library, Disc, Search, LogIn, LogOut, Sun, Moon, GraduationCap, Newspaper, Globe } from 'lucide-react';
+import { Library, Disc, Search, LogIn, LogOut, Sun, Moon, GraduationCap, Newspaper, Globe, Download } from 'lucide-react';
 import { View } from '../types';
 import { useI18n } from '../context/I18nContext';
 
@@ -180,6 +180,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </span>
                 )}
               </button>
+              
+              {/* Export Library (Backup) */}
+              <button
+                onClick={async () => {
+                  try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/songs/actions/export', {
+                      headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `acestep_backup_${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                  } catch (err) {
+                    console.error('Export failed:', err);
+                  }
+                }}
+                className={`
+                  w-full rounded-xl flex items-center gap-3 transition-all duration-200 text-zinc-500 dark:text-zinc-400 hover:text-green-500 hover:bg-green-500/10
+                  ${isOpen ? 'px-3 py-2.5 justify-start' : 'aspect-square justify-center'}
+                `}
+                title={language === 'ja' ? 'ライブラリを保存' : 'Export Library'}
+              >
+                <div className="flex-shrink-0"><Download size={20} /></div>
+                {isOpen && (
+                  <span className="text-sm font-medium whitespace-nowrap">
+                    {language === 'ja' ? 'ライブラリを保存' : 'Export Library'}
+                  </span>
+                )}
+              </button>
+
               {/* Logout */}
               <button
                 onClick={onLogout}
