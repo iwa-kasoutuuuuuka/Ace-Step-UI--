@@ -33,6 +33,30 @@ export const JPOP_PRESETS: Preset[] = [
     description_en: 'Beautiful ballad with piano and strings.'
   },
   {
+    id: 'rpg-battle',
+    name_ja: 'J-RPG 戦闘曲',
+    name_en: 'J-RPG Battle',
+    style: 'J-RPG Battle, epic orchestral, rock hybrid, fast tempo, heroic, dramatic',
+    description_ja: '疾走感のある壮大な戦闘用オーケストラ・ロック。',
+    description_en: 'Epic, fast-paced orchestral rock for battle scenes.'
+  },
+  {
+    id: 'anime-op-energy',
+    name_ja: 'アニソン OP風 (エネルギッシュ)',
+    name_en: 'Anime OP (High Energy)',
+    style: 'Anime Opening, J-Rock, high energy, fast tempo, inspirational, punchy drums, power chords',
+    description_ja: '疾走感あふれるエネルギッシュなアニメ主題歌。',
+    description_en: 'High-energy, fast-paced anime theme song.'
+  },
+  {
+    id: '8bit-retro',
+    name_ja: '8-bit レトロゲーム',
+    name_en: '8-bit Retro',
+    style: '8-bit, chiptune, NES style, electronic, retro gaming, catchy, square wave, game soundtrack',
+    description_ja: '懐かしいレトロゲーム風のチップチューンサウンド。',
+    description_en: 'Nostalgic, retro 8-bit chiptune sound.'
+  },
+  {
     id: 'vocaloid-style',
     name_ja: 'ボカロ風',
     name_en: 'Vocaloid Style',
@@ -55,5 +79,21 @@ export const JPOP_PRESETS: Preset[] = [
     style: 'Japanese Idol Pop, cute, energetic, group vocals, sparkles, upbeat, catchy, happy',
     description_ja: '明るく元気な王道アイドルソング。',
     description_en: 'Bright and energetic classic idol pop song.'
+  },
+  {
+    id: 'visual-novel-piano',
+    name_ja: '美少女ゲーム風 (日常/感動)',
+    name_en: 'Visual Novel Style',
+    style: 'Visual Novel, piano, soft strings, gentle, emotional, peaceful, daily life, sentimental',
+    description_ja: '美少女ゲームの日常や感動シーンを彩る優しいピアノ曲。',
+    description_en: 'Gentle piano music for daily life or emotional scenes in visual novels.'
+  },
+  {
+    id: 'arcade-techno',
+    name_ja: 'アーケード・テクノ',
+    name_en: 'Arcade Techno',
+    style: 'Arcade game, techno, fast BPM, electronic, rhythmic, cyber, high energy, synthesizer',
+    description_ja: 'ゲームセンターの熱気を想起させる高速テクノ。',
+    description_en: 'High-speed techno reminiscent of the heat of an arcade.'
   }
 ];

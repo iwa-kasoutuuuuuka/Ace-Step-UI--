@@ -25,11 +25,17 @@ export const JAPANESE_STYLES = [
   'Vocaloid Style',
   'Future Funk',
   'Kawaii Metal',
-  'Shibuya-kei'
+  'Shibuya-kei',
+  '8-bit (Chiptune)',
+  'J-RPG Battle',
+  'Anime OP/ED',
+  'Denpa-kei',
+  'Visual Novel Style'
 ];
 
 export const JAPANESE_MOOD_TAGS = [
-  'エモい', '癒やし', '爆音', 'チルい', '懐かしい', 'アゲアゲ', '疾走感', '切ない', 'お洒落', 'ダーク'
+  'エモい', '癒やし', '爆音', 'チルい', '懐かしい', 'アゲアゲ', '疾走感', '切ない', 'お洒落', 'ダーク',
+  '熱い', '壮大', '緊迫', '萌え', 'レトロ', 'サイバー'
 ];
 
 // Backward-compatible alias

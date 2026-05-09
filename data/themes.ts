@@ -22,6 +22,41 @@ export const JAPANESE_THEMES: Theme[] = [
     keywords: 'Summer night, city lights, driving, funk, bass guitar, synthesizer, upbeat'
   },
   {
+    name_ja: '雨の日のカフェ',
+    name_en: 'Rainy Day Cafe',
+    style_ja: '雨、静寂、コーヒー、憂鬱',
+    style_en: 'Rain, silence, coffee, melancholy',
+    keywords: 'Lo-fi, Jazz, Rainy, Chill, Piano'
+  },
+  {
+    name_ja: '異世界召喚の序曲',
+    name_en: 'Overture to Another World',
+    style_ja: '冒険、ファンタジー、壮大',
+    style_en: 'Adventure, fantasy, epic',
+    keywords: 'Epic, Orchestral, Fantasy, Adventure, Heroic'
+  },
+  {
+    name_ja: 'サイバーパンク・ネオ東京',
+    name_en: 'Cyberpunk Neo Tokyo',
+    style_ja: '未来、ネオン、退廃',
+    style_en: 'Future, neon, decadent',
+    keywords: 'Cyberpunk, Techno, Electronic, Synthwave, Dark'
+  },
+  {
+    name_ja: '放課後の屋上',
+    name_en: 'Afterschool Rooftop',
+    style_ja: '青春、思い出、放課後',
+    style_en: 'Youth, memories, after school',
+    keywords: 'J-Pop, School, Youth, Nostalgic, Acoustic'
+  },
+  {
+    name_ja: '伝説のボス戦',
+    name_en: 'Legendary Boss Battle',
+    style_ja: '戦い、緊張、強敵',
+    style_en: 'Battle, tension, formidable enemy',
+    keywords: 'Gothic Metal, Pipe Organ, Orchestral, Intense, Epic'
+  },
+  {
     name_ja: '雨降る午後のカフェ',
     name_en: 'Rainy Afternoon Cafe',
     style_ja: '雨、静寂、コーヒー、憂鬱',
