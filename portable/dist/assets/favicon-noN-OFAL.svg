@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Main Circle -->
+  <circle cx="50" cy="50" r="45" fill="none" stroke="url(#grad)" stroke-width="2" opacity="0.2"/>
+  <!-- Rising Sun Motif (Subtle) -->
+  <circle cx="50" cy="50" r="20" fill="url(#grad)" opacity="0.1"/>
+  <!-- Music Note / Star Hybrid -->
+  <path d="M45 25 L45 65 C45 70 40 73 35 73 C30 73 25 70 25 65 C25 60 30 57 35 57 C37 57 39 58 41 59 L41 35 L75 25 L75 55 C75 60 70 63 65 63 C60 63 55 60 55 55 C55 50 60 47 65 47 C67 47 69 48 71 49 L71 35 L45 45 Z" fill="url(#grad)" filter="url(#glow)"/>
+  <!-- Sparkle -->
+  <path d="M80 20 L82 25 L87 27 L82 29 L80 34 L78 29 L73 27 L78 25 Z" fill="#f472b6"/>
+</svg>

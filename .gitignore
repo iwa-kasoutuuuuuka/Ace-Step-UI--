@@ -1,11 +1,14 @@
 # Dependencies
 node_modules/
 server/node_modules/
+!portable/server/node_modules/
 
 # Build outputs
 dist/
 dist-ssr/
 build/
+!portable/dist/
+!portable/server/dist/
 *.tsbuildinfo
 
 # Environment files

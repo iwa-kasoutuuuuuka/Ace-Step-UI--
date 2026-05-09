@@ -110,6 +110,19 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'ACE-Step UI API' });
 });
 
+// Serve frontend in production/portable mode
+const distPath = path.join(__dirname, '../../dist');
+app.use(express.static(distPath));
+
+// Handle React routing
+app.get('*', (req, res, next) => {
+  // If it's an API call, skip to next (which might be routes)
+  if (req.path.startsWith('/api') || req.path.startsWith('/audio') || req.path.startsWith('/editor')) {
+    return next();
+  }
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
 // oEmbed endpoint for rich embeds
 app.get('/api/oembed', async (req, res) => {
   const url = req.query.url as string;
