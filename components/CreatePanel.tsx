@@ -4,7 +4,9 @@ import { GenerationParams, Song } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 import { generateApi } from '../services/api';
-import { MAIN_STYLES } from '../data/genres';
+import { MAIN_STYLES, JAPANESE_STYLES } from '../data/genres';
+import { JPOP_PRESETS } from '../data/presets';
+import { JAPANESE_THEMES } from '../data/themes';
 import { EditableSlider } from './EditableSlider';
 
 interface ReferenceTrack {
@@ -118,19 +120,32 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
   onAudioSelectionApplied,
 }) => {
   const { isAuthenticated, token, user } = useAuth();
-  const { t } = useI18n();
-
-  // Randomly select 6 music tags from MAIN_STYLES
-  const [musicTags, setMusicTags] = useState<string[]>(() => {
+  const { language, t } = useI18n();
+  const [showPresets, setShowPresets] = useState(false);
+  
+  const getStylesForLanguage = useCallback(() => {
+    if (language === 'ja') {
+      // Mix Japanese styles with some random main styles
+      const shuffledJa = [...JAPANESE_STYLES].sort(() => Math.random() - 0.5);
+      const shuffledMain = [...MAIN_STYLES].sort(() => Math.random() - 0.5);
+      return [...shuffledJa.slice(0, 3), ...shuffledMain.slice(0, 3)].sort(() => Math.random() - 0.5);
+    }
     const shuffled = [...MAIN_STYLES].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 6);
-  });
+  }, [language]);
+
+  // Randomly select 6 music tags
+  const [musicTags, setMusicTags] = useState<string[]>(getStylesForLanguage);
+
+  // Update tags when language changes
+  useEffect(() => {
+    setMusicTags(getStylesForLanguage());
+  }, [getStylesForLanguage]);
 
   // Function to refresh music tags
   const refreshMusicTags = useCallback(() => {
-    const shuffled = [...MAIN_STYLES].sort(() => Math.random() - 0.5);
-    setMusicTags(shuffled.slice(0, 6));
-  }, []);
+    setMusicTags(getStylesForLanguage());
+  }, [getStylesForLanguage]);
 
   // Mode
   const [customMode, setCustomMode] = useState(true);
@@ -330,11 +345,36 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
     }
   };
 
+  // Presets
+  const handleApplyPreset = (preset: typeof JPOP_PRESETS[0]) => {
+    setStyle(preset.style);
+    setTitle(language === 'ja' ? preset.name_ja : preset.name_en);
+  };
+
+  const handleApplyTheme = () => {
+    const theme = JAPANESE_THEMES[Math.floor(Math.random() * JAPANESE_THEMES.length)];
+    setTitle(language === 'ja' ? theme.name_ja : theme.name_en);
+    setStyle(theme.keywords);
+  };
+
+  const setVocalType = (type: 'male' | 'female' | 'vocaloid') => {
+    let prefix = '';
+    if (type === 'male') prefix = 'Male vocals, ';
+    if (type === 'female') prefix = 'Female vocals, ';
+    if (type === 'vocaloid') prefix = 'Vocaloid style, synthesized vocals, ';
+    
+    // Remove existing gender prefixes if any
+    let newStyle = style.replace(/^(Male vocals|Female vocals|Vocaloid style, synthesized vocals), /i, '');
+    setStyle(prefix + newStyle);
+  };
+
+  // Resize Logic
   // Resize Logic
   const [lyricsHeight, setLyricsHeight] = useState(() => {
     const saved = localStorage.getItem('acestep_lyrics_height');
     return saved ? parseInt(saved, 10) : 144; // Default h-36 is 144px (9rem * 16)
   });
+
   const [isResizing, setIsResizing] = useState(false);
   const lyricsRef = useRef<HTMLDivElement>(null);
 
@@ -1125,6 +1165,11 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
             <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">ACE-Step v1.5</span>
+            {language === 'ja' && (
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-600 dark:text-pink-400 border border-pink-500/20">
+                日本版
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -1599,6 +1644,43 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
               </div>
             </div>
 
+            {/* Presets Section (New) */}
+            <div className="bg-white dark:bg-suno-card rounded-xl border border-zinc-200 dark:border-white/5 overflow-hidden transition-all">
+              <button
+                onClick={() => setShowPresets(!showPresets)}
+                className="w-full px-3 py-2.5 flex items-center justify-between bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1 rounded bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400">
+                    <Sparkles size={14} />
+                  </div>
+                  <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+                    {language === 'ja' ? 'J-POP プリセット' : 'J-POP Presets'}
+                  </span>
+                </div>
+                <ChevronDown size={14} className={`text-zinc-400 transition-transform ${showPresets ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {showPresets && (
+                <div className="p-3 grid grid-cols-2 sm:grid-cols-3 gap-2 bg-white dark:bg-black/10">
+                  {JPOP_PRESETS.map(preset => (
+                    <button
+                      key={preset.id}
+                      onClick={() => handleApplyPreset(preset)}
+                      className="group flex flex-col items-start p-2.5 rounded-lg border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02] hover:border-pink-500/50 hover:bg-pink-50/50 dark:hover:bg-pink-500/5 transition-all text-left"
+                    >
+                      <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-pink-600 dark:group-hover:text-pink-400">
+                        {language === 'ja' ? preset.name_ja : preset.name_en}
+                      </span>
+                      <span className="text-[9px] text-zinc-500 dark:text-zinc-500 line-clamp-1 mt-0.5">
+                        {language === 'ja' ? preset.description_ja : preset.description_en}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Style Input */}
             <div className="bg-white dark:bg-suno-card rounded-xl border border-zinc-200 dark:border-white/5 overflow-hidden transition-colors group focus-within:border-zinc-400 dark:focus-within:border-white/20">
               <div className="flex items-center justify-between px-3 py-2.5 bg-zinc-50 dark:bg-white/5 border-b border-zinc-100 dark:border-white/5">
@@ -1647,6 +1729,24 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
                 className="w-full h-20 bg-transparent p-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none resize-none"
               />
               <div className="px-3 pb-3 space-y-3">
+                {/* Vocal Character (Japanese Edition) */}
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter w-14">Vocal:</span>
+                  <div className="flex gap-1">
+                    {['male', 'female', 'vocaloid'].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => setVocalType(type as any)}
+                        className="text-[9px] font-bold px-2 py-0.5 rounded bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-500/10 transition-all border border-transparent hover:border-pink-500/30"
+                      >
+                        {type === 'male' ? (language === 'ja' ? '男性' : 'Male') : 
+                         type === 'female' ? (language === 'ja' ? '女性' : 'Female') : 
+                         (language === 'ja' ? 'ボカロ風' : 'Vocaloid')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Quick Tags */}
                 <div className="flex flex-wrap gap-2">
                   {musicTags.map(tag => (
@@ -1664,8 +1764,15 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
 
             {/* Title Input */}
             <div className="bg-white dark:bg-suno-card rounded-xl border border-zinc-200 dark:border-white/5 overflow-hidden">
-              <div className="px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 border-b border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-white/5">
-                {t('title')}
+              <div className="px-3 py-2.5 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-white/5">
+                <span className="text-xs font-bold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{t('title')}</span>
+                <button
+                  onClick={handleApplyTheme}
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[10px] font-bold hover:scale-105 active:scale-95 transition-all shadow-sm"
+                >
+                  <Dices size={10} />
+                  <span>{language === 'ja' ? 'テーマおまかせ' : 'Idea'}</span>
+                </button>
               </div>
               <input
                 type="text"
@@ -2771,11 +2878,15 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
       <div className="p-4 mt-auto sticky bottom-0 bg-zinc-50/95 dark:bg-suno-panel/95 backdrop-blur-sm z-10 border-t border-zinc-200 dark:border-white/5 space-y-3">
         <button
           onClick={handleGenerate}
-          className="w-full h-12 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] bg-gradient-to-r from-orange-500 to-pink-600 text-white shadow-lg hover:brightness-110"
+          className="w-full h-14 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] bg-gradient-to-r from-orange-500 via-pink-600 to-purple-600 text-white shadow-xl shadow-pink-500/20 hover:shadow-pink-500/40 hover:scale-[1.01] hover:brightness-110"
           disabled={isGenerating || !isAuthenticated}
         >
-          <Sparkles size={18} />
-          <span>
+          {isGenerating ? (
+            <Loader2 size={20} className="animate-spin" />
+          ) : (
+            <Sparkles size={20} className="animate-pulse" />
+          )}
+          <span className="tracking-tight">
             {isGenerating 
               ? t('generating')
               : bulkCount > 1

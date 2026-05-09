@@ -1,5 +1,5 @@
 import React from 'react';
-import { Library, Disc, Search, LogIn, LogOut, Sun, Moon, GraduationCap, Newspaper } from 'lucide-react';
+import { Library, Disc, Search, LogIn, LogOut, Sun, Moon, GraduationCap, Newspaper, Globe } from 'lucide-react';
 import { View } from '../types';
 import { useI18n } from '../context/I18nContext';
 
@@ -28,7 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpen = true,
   onToggle,
 }) => {
-  const { t } = useI18n();
+  const { t, language, setLanguage } = useI18n();
 
   return (
     <>
@@ -54,14 +54,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onNavigate('create')}
             title={t('aceStepUI')}
           >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white">
+              <path d="M45 25 L45 65 C45 70 40 73 35 73 C30 73 25 70 25 65 C25 60 30 57 35 57 C37 57 39 58 41 59 L41 35 L75 25 L75 55 C75 60 70 63 65 63 C60 63 55 60 55 55 C55 50 60 47 65 47 C67 47 69 48 71 49 L71 35 L45 45 Z" fill="currentColor"/>
+              <path d="M80 20 L82 25 L87 27 L82 29 L80 34 L78 29 L73 27 L78 25 Z" fill="white" opacity="0.8"/>
             </svg>
           </div>
           {isOpen && (
-            <span className="text-lg font-bold text-zinc-900 dark:text-white whitespace-nowrap">ACE Step</span>
+            <div className="flex flex-col">
+              <span className="font-black text-lg tracking-tighter text-zinc-900 dark:text-white leading-tight">ACE-Step</span>
+              <span className="text-[10px] font-bold text-pink-500 uppercase tracking-widest leading-none">Japanese Ed.</span>
+            </div>
           )}
         </div>
         {/* Collapse/Expand Button */}
@@ -120,6 +122,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
 
         <div className="mt-auto flex flex-col gap-2">
+          {/* Language Toggle */}
+          <button
+            onClick={() => setLanguage(language === 'ja' ? 'en' : 'ja')}
+            className={`
+              w-full rounded-xl flex items-center gap-3 transition-all duration-200 text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5
+              ${isOpen ? 'px-3 py-2.5 justify-start' : 'aspect-square justify-center'}
+            `}
+            title={language === 'ja' ? 'English' : '日本語'}
+          >
+            <div className="flex-shrink-0"><Globe size={20} /></div>
+            {isOpen && (
+              <span className="text-sm font-medium whitespace-nowrap">
+                {language === 'ja' ? 'English' : '日本語'}
+              </span>
+            )}
+          </button>
+
           {/* Theme Toggle */}
           <button
             onClick={onToggleTheme}

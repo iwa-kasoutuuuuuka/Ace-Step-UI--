@@ -14,6 +14,20 @@ export const ALL_STYLES = allStyleText
   .map(line => line.trim())
   .filter(line => line.length > 0);
 
+// Japanese-specific styles
+export const JAPANESE_STYLES = [
+  'J-POP',
+  'Anime',
+  'City Pop',
+  'Eurobeat',
+  'Visual Kei',
+  'Enka',
+  'Vocaloid Style',
+  'Future Funk',
+  'Kawaii Metal',
+  'Shibuya-kei'
+];
+
 // Backward-compatible alias
 export const GENRE_KEYS = MAIN_STYLES;
 
