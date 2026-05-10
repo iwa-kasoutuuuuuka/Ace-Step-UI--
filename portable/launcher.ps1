@@ -12,7 +12,6 @@ try {
     Write-Host "==================================================" -ForegroundColor Cyan
     Write-Host ""
 
-    # Node.js のパス設定 (絶対パス化)
     $nodeExe = "node"
     $localNode = Join-Path $currentDir "node\node.exe"
     if (Test-Path $localNode) {
@@ -39,21 +38,24 @@ try {
 
     Write-Host "[+] サービスを起動しています..." -ForegroundColor Green
 
-    # サーバー起動 (Native PowerShell 方式)
+    # --- サーバー起動 ---
     $serverPath = Join-Path $currentDir "server"
-    Start-Process $nodeExe -ArgumentList "dist/index.js" -WorkingDirectory $serverPath -WindowStyle Normal
+    $serverCmd = "/k cd /d "$serverPath" && "$nodeExe" dist/index.js"
+    Start-Process cmd -ArgumentList $serverCmd
 
-    # ACE-Step API 起動
+    # --- ACE-Step API 起動 ---
     if (Test-Path (Join-Path $aceStepPath "python_embeded\python.exe")) {
         $python = Join-Path $aceStepPath "python_embeded\python.exe"
-        Start-Process $python -ArgumentList "-m acestep --port 8001 --enable-api" -WorkingDirectory $aceStepPath -WindowStyle Normal
+        $apiCmd = "/k cd /d "$aceStepPath" && "$python" -m acestep --port 8001 --enable-api"
+        Start-Process cmd -ArgumentList $apiCmd
     } else {
-        Start-Process python -ArgumentList "-m acestep --port 8001 --enable-api" -WorkingDirectory $aceStepPath -WindowStyle Normal
+        $apiCmd = "/k cd /d "$aceStepPath" && python -m acestep --port 8001 --enable-api"
+        Start-Process cmd -ArgumentList $apiCmd
     }
 
     Write-Host ""
     Write-Host "--------------------------------------------------"
-    Write-Host " 全ての準備が整いました。ブラウザで開きます。"
+    Write-Host " サービスを起動しました。5秒後にブラウザを開きます。"
     Write-Host "--------------------------------------------------"
     Start-Sleep -Seconds 5
     Start-Process "http://localhost:3001"
