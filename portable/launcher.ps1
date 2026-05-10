@@ -38,19 +38,19 @@ try {
 
     Write-Host "[+] サービスを起動しています..." -ForegroundColor Green
 
-    # --- サーバー起動 ---
+    # --- サーバー起動 (引数を個別に指定して引用符エラーを回避) ---
     $serverPath = Join-Path $currentDir "server"
-    $serverCmd = "/k cd /d "$serverPath" && "$nodeExe" dist/index.js"
-    Start-Process cmd -ArgumentList $serverCmd
+    $serverArgs = "/k cd /d `"$serverPath`" && `"$nodeExe`" dist/index.js"
+    Start-Process cmd -ArgumentList $serverArgs
 
     # --- ACE-Step API 起動 ---
     if (Test-Path (Join-Path $aceStepPath "python_embeded\python.exe")) {
         $python = Join-Path $aceStepPath "python_embeded\python.exe"
-        $apiCmd = "/k cd /d "$aceStepPath" && "$python" -m acestep --port 8001 --enable-api"
-        Start-Process cmd -ArgumentList $apiCmd
+        $apiArgs = "/k cd /d `"$aceStepPath`" && `"$python`" -m acestep --port 8001 --enable-api"
+        Start-Process cmd -ArgumentList $apiArgs
     } else {
-        $apiCmd = "/k cd /d "$aceStepPath" && python -m acestep --port 8001 --enable-api"
-        Start-Process cmd -ArgumentList $apiCmd
+        $apiArgs = "/k cd /d `"$aceStepPath`" && python -m acestep --port 8001 --enable-api"
+        Start-Process cmd -ArgumentList $apiArgs
     }
 
     Write-Host ""
