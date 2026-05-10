@@ -19,39 +19,48 @@ try {
         Write-Host "[+] 同梱版 Node.js を使用します。" -ForegroundColor Gray
     }
 
-    function Get-EnginePath {
+    # --- エンジン本体と Python のパスを賢く探す関数 ---
+    function Get-EngineConfig {
         param($eDir, $cFile)
-        if (Test-Path (Join-Path $eDir "python_embeded\python.exe")) { return $eDir }
-        if (Test-Path $cFile) {
-            $savedPath = Get-Content $cFile -Raw
-            if ($savedPath -and (Test-Path $savedPath.Trim())) { return $savedPath.Trim() }
+        $target = $null
+        if (Test-Path $eDir) { $target = $eDir }
+        elseif (Test-Path $cFile) {
+            $saved = Get-Content $cFile -Raw
+            if ($saved -and (Test-Path $saved.Trim())) { $target = $saved.Trim() }
+        }
+        
+        if ($null -ne $target) {
+            # python.exe の場所を特定
+            $py = Join-Path $target "python_embeded\python.exe"
+            if (-not (Test-Path $py)) { $py = Join-Path $target "python.exe" }
+            
+            if (Test-Path $py) {
+                return @{ Path = $target; Python = $py }
+            }
         }
         return $null
     }
 
-    $aceStepPath = Get-EnginePath $engineDir $configFile
-    if ($null -eq $aceStepPath) {
+    $config = Get-EngineConfig $engineDir $configFile
+    if ($null -eq $config) {
         Write-Host "[!] エンジン本体が見つかりません。セットアップをやり直してください。" -ForegroundColor Red
         Read-Host "Enterで終了"
         return
     }
 
+    $aceStepPath = $config.Path
+    $pythonExe = $config.Python
+
     Write-Host "[+] サービスを起動しています..." -ForegroundColor Green
 
-    # --- サーバー起動 (引数を個別に指定して引用符エラーを回避) ---
+    # --- サーバー起動 (デバッグ用に一時停止するように /k を使用) ---
     $serverPath = Join-Path $currentDir "server"
-    $serverArgs = "/k cd /d `"$serverPath`" && `"$nodeExe`" dist/index.js"
-    Start-Process cmd -ArgumentList $serverArgs
+    $serverCmd = "/k cd /d `"$serverPath`" && `"$nodeExe`" dist/index.js"
+    Start-Process cmd -ArgumentList $serverCmd
 
     # --- ACE-Step API 起動 ---
-    if (Test-Path (Join-Path $aceStepPath "python_embeded\python.exe")) {
-        $python = Join-Path $aceStepPath "python_embeded\python.exe"
-        $apiArgs = "/k cd /d `"$aceStepPath`" && `"$python`" -m acestep --port 8001 --enable-api"
-        Start-Process cmd -ArgumentList $apiArgs
-    } else {
-        $apiArgs = "/k cd /d `"$aceStepPath`" && python -m acestep --port 8001 --enable-api"
-        Start-Process cmd -ArgumentList $apiArgs
-    }
+    $apiCmd = "/k cd /d `"$aceStepPath`" && `"$pythonExe`" -m acestep --port 8001 --enable-api"
+    Start-Process cmd -ArgumentList $apiCmd
 
     Write-Host ""
     Write-Host "--------------------------------------------------"
