@@ -1,4 +1,4 @@
-$url = 'https://files.acemusic.ai/acemusic/win/ACE-Step-1.5.7z'
+﻿$url = 'https://files.acemusic.ai/acemusic/win/ACE-Step-1.5.7z'
 $zipFile = Join-Path $PSScriptRoot 'engine.7z'
 $extractDir = Join-Path $PSScriptRoot 'engine_temp'
 $finalDir = Join-Path $PSScriptRoot 'engine'
