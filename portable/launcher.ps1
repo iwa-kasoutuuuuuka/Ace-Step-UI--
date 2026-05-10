@@ -4,7 +4,6 @@ try {
     $currentDir = Split-Path $MyInvocation.MyCommand.Path -Parent
     if (-not $currentDir) { $currentDir = Get-Location }
     $engineDir = Join-Path $currentDir "engine"
-    $configFile = Join-Path $currentDir ".acestep_path"
 
     Clear-Host
     Write-Host "==================================================" -ForegroundColor Cyan
@@ -12,55 +11,47 @@ try {
     Write-Host "==================================================" -ForegroundColor Cyan
     Write-Host ""
 
+    # Node.js パス (絶対パスで確実に)
     $nodeExe = "node"
-    $localNode = Join-Path $currentDir "node\node.exe"
-    if (Test-Path $localNode) {
-        $nodeExe = $localNode
+    if (Test-Path (Join-Path $currentDir "node\node.exe")) {
+        $nodeExe = Join-Path $currentDir "node\node.exe"
         Write-Host "[+] 同梱版 Node.js を使用します。" -ForegroundColor Gray
     }
 
-    # --- エンジン本体と Python のパスを賢く探す関数 ---
-    function Get-EngineConfig {
-        param($eDir, $cFile)
-        $target = $null
-        if (Test-Path $eDir) { $target = $eDir }
-        elseif (Test-Path $cFile) {
-            $saved = Get-Content $cFile -Raw
-            if ($saved -and (Test-Path $saved.Trim())) { $target = $saved.Trim() }
-        }
-        
-        if ($null -ne $target) {
-            # python.exe の場所を特定
-            $py = Join-Path $target "python_embeded\python.exe"
-            if (-not (Test-Path $py)) { $py = Join-Path $target "python.exe" }
-            
-            if (Test-Path $py) {
-                return @{ Path = $target; Python = $py }
-            }
-        }
-        return $null
+    # Python パスを全自動で探索
+    $pyExe = $null
+    $searchPaths = @(
+        (Join-Path $engineDir "python_embeded\python.exe"),
+        (Join-Path $engineDir "python.exe"),
+        (Join-Path $currentDir "engine\python_embeded\python.exe")
+    )
+
+    foreach ($path in $searchPaths) {
+        if (Test-Path $path) { $pyExe = $path; break }
     }
 
-    $config = Get-EngineConfig $engineDir $configFile
-    if ($null -eq $config) {
-        Write-Host "[!] エンジン本体が見つかりません。セットアップをやり直してください。" -ForegroundColor Red
+    if ($null -eq $pyExe) {
+        Write-Host "[!] Pythonエンジンが見つかりません。セットアップをやり直してください。" -ForegroundColor Red
         Read-Host "Enterで終了"
         return
     }
 
-    $aceStepPath = $config.Path
-    $pythonExe = $config.Python
+    $aceStepPath = Split-Path $pyExe -Parent
+    # もし python_embeded の中にいたなら、その親をベースにする
+    if ($aceStepPath.EndsWith("python_embeded")) {
+        $aceStepPath = Split-Path $aceStepPath -Parent
+    }
 
     Write-Host "[+] サービスを起動しています..." -ForegroundColor Green
 
-    # --- サーバー起動 (デバッグ用に一時停止するように /k を使用) ---
+    # --- サーバー起動 (最もシンプルな方法) ---
     $serverPath = Join-Path $currentDir "server"
-    $serverCmd = "/k cd /d `"$serverPath`" && `"$nodeExe`" dist/index.js"
-    Start-Process cmd -ArgumentList $serverCmd
+    $nodeCmd = "cd /d `"$serverPath`" && `"$nodeExe`" dist/index.js"
+    Start-Process cmd -ArgumentList "/k $nodeCmd"
 
-    # --- ACE-Step API 起動 ---
-    $apiCmd = "/k cd /d `"$aceStepPath`" && `"$pythonExe`" -m acestep --port 8001 --enable-api"
-    Start-Process cmd -ArgumentList $apiCmd
+    # --- API 起動 ---
+    $apiCmd = "cd /d `"$aceStepPath`" && `"$pyExe`" -m acestep --port 8001 --enable-api"
+    Start-Process cmd -ArgumentList "/k $apiCmd"
 
     Write-Host ""
     Write-Host "--------------------------------------------------"
