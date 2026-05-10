@@ -39,9 +39,9 @@ try {
     $nodeCmd = "cd /d `"$serverPath`" && `"$nodeExe`" dist/index.js"
     Start-Process cmd -ArgumentList "/k $nodeCmd"
 
-    # --- API 起動 (8001) - ターゲットを api_server に確定 ---
+    # --- API 起動 (8001) - 余計な引数(--enable-api)を削除 ---
     $apiTarget = "acestep.api_server"
-    $apiCmd = "cd /d `"$aceStepPath`" && `"$pyExe`" -m $apiTarget --port 8001 --enable-api"
+    $apiCmd = "cd /d `"$aceStepPath`" && `"$pyExe`" -m $apiTarget --port 8001"
     Start-Process cmd -ArgumentList "/k $apiCmd"
 
     Write-Host ""
