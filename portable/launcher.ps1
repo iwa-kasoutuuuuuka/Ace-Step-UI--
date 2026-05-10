@@ -5,6 +5,9 @@ $PSScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $engineDir = Join-Path $PSScriptRoot "engine"
 $configFile = Join-Path $PSScriptRoot ".acestep_path"
 
+# 作業ディレクトリを移動
+Set-Location $PSScriptRoot
+
 Clear-Host
 Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host "   ACE-Step UI 日本語 ポータブル版" -ForegroundColor Cyan
@@ -17,9 +20,11 @@ $localNode = Join-Path $PSScriptRoot "node\node.exe"
 if (Test-Path $localNode) {
     $nodeExe = "`"$localNode`""
     Write-Host "[+] 同梱版 Node.js を使用します。" -ForegroundColor Gray
+} else {
+    Write-Host "[!] 同梱版 Node.js が見つからないため、システムの Node を使用します。" -ForegroundColor Gray
 }
 
-# エンジンのパス確認
+# エンジンのパス確認関数
 function Get-EnginePath {
     if (Test-Path (Join-Path $engineDir "python_embeded\python.exe")) { return $engineDir }
     if (Test-Path $configFile) {
@@ -64,19 +69,22 @@ Write-Host "[+] サービスを起動しています..." -ForegroundColor Green
 
 # サーバー (Frontend/Backend)
 $serverPath = Join-Path $PSScriptRoot "server"
-Start-Process cmd -ArgumentList "/c cd /d `"$serverPath`" && $nodeExe dist/index.js" -WindowStyle Normal
+$nodeArgs = "/c cd /d `"$serverPath`" && $nodeExe dist/index.js"
+Start-Process "cmd.exe" -ArgumentList $nodeArgs -WindowStyle Normal
 
 # ACE-Step API
 if (Test-Path (Join-Path $aceStepPath "python_embeded\python.exe")) {
     $python = Join-Path $aceStepPath "python_embeded\python.exe"
-    Start-Process cmd -ArgumentList "/c cd /d `"$aceStepPath`" && `"$python`" -m acestep --port 8001 --enable-api" -WindowStyle Normal
+    $apiArgs = "/c cd /d `"$aceStepPath`" && `"$python`" -m acestep --port 8001 --enable-api"
+    Start-Process "cmd.exe" -ArgumentList $apiArgs -WindowStyle Normal
 } else {
-    Start-Process cmd -ArgumentList "/c cd /d `"$aceStepPath`" && python -m acestep --port 8001 --enable-api" -WindowStyle Normal
+    $apiArgs = "/c cd /d `"$aceStepPath`" && python -m acestep --port 8001 --enable-api"
+    Start-Process "cmd.exe" -ArgumentList $apiArgs -WindowStyle Normal
 }
 
 Write-Host ""
 Write-Host "--------------------------------------------------"
-Write-Host " 全ての準備が整いました。ブラウザで開きます。"
+Write-Host " 全ての準備が整いました。しばらくお待ちください。"
 Write-Host "--------------------------------------------------"
 Start-Sleep -Seconds 5
 Start-Process "http://localhost:3001"
