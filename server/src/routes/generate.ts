@@ -675,7 +675,7 @@ router.get('/models', async (_req, res: Response) => {
   }
 });
 
-// GET /api/generate/random-description — Load a random simple description from Gradio
+// GET /api/generate/random-description  ELoad a random simple description from Gradio
 router.get('/random-description', authMiddleware, async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const client = await getGradioClient();
@@ -800,16 +800,13 @@ router.post('/format', authMiddleware, async (req: AuthenticatedRequest, res: Re
           temperature: temperature ?? 0.85,
           param_obj: paramObj,
         }),
-        signal: AbortSignal.timeout(300_000), // 5 min — LLM may need to init first
+        signal: AbortSignal.timeout(300_000), // 5 min  ELLM may need to init first
       });
 
       const apiData = await apiRes.json() as any;
 
       if (!apiRes.ok || apiData.code !== 200) {
-        const errMsg = apiData.error || apiData.detail || `Format API returned ${apiRes.status}`;
-        console.error('[Format] API error:', errMsg);
-        res.status(500).json({ success: false, error: errMsg });
-        return;
+        throw new Error(`Format API returned ${apiRes.status}`);
       }
 
       const d = apiData.data;
@@ -824,14 +821,8 @@ router.post('/format', authMiddleware, async (req: AuthenticatedRequest, res: Re
       });
       return;
     } catch (fetchErr: any) {
-      // Only fall back to Python spawn on network errors (service not yet reachable)
-      if (fetchErr?.name !== 'AbortError' && (fetchErr?.code === 'ECONNREFUSED' || fetchErr?.cause?.code === 'ECONNREFUSED')) {
-        console.warn('[Format] REST API unreachable, falling back to Python spawn');
-      } else {
-        console.error('[Format] REST API request failed:', fetchErr?.message);
-        res.status(500).json({ success: false, error: fetchErr?.message || 'Format request failed' });
-        return;
-      }
+      // Fall back to Python spawn if REST API is unreachable or returns 404 (e.g. running Gradio instead of API server)
+      console.warn(`[Format] REST API failed (${fetchErr?.message}), falling back to Python spawn`);
     }
 
     // Fallback: Python spawn (only reached when REST API is unreachable)
