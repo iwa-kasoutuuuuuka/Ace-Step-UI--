@@ -25,32 +25,30 @@ try {
         if (Test-Path $path) { $pyExe = $path; break }
     }
     if ($null -eq $pyExe) {
-        Write-Host "[!] エンジンが見つかりません。セットアップをやり直してください。" -ForegroundColor Red
+        Write-Host "[!] エンジンが見つかりません。" -ForegroundColor Red
         Read-Host "Enterで終了"
         return
     }
-    $aceStepPath = Split-Path $pyExe -Parent
-    if ($aceStepPath.ToLower().EndsWith("python_embeded")) { $aceStepPath = Split-Path $aceStepPath -Parent }
 
     Write-Host "[+] サービスを起動しています..." -ForegroundColor Green
 
-    # --- サーバー起動 (3001) ---
+    # --- Gradio UI 起動 (8001) - Node.jsが期待するGradioクライアント接続先 ---
+    $gradioScript = Join-Path $engineDir "acestep\acestep_v15_pipeline.py"
+    $apiCmd = "cd /d `"$engineDir`" && `"$pyExe`" `"$gradioScript`" --port 8001 --server-name 127.0.0.1"
+    Start-Process cmd -ArgumentList "/k $apiCmd"
+
+    # --- Node.js サーバー起動 (3001) - Gradioが立ち上がる時間を確保 ---
+    Start-Sleep -Seconds 3
     $serverPath = Join-Path $currentDir "server"
     $nodeCmd = "cd /d `"$serverPath`" && `"$nodeExe`" dist/index.js"
     Start-Process cmd -ArgumentList "/k $nodeCmd"
 
-    # --- API 起動 (8001) ---
-    $apiTarget = "acestep.api_server"
-    $apiCmd = "cd /d `"$aceStepPath`" && `"$pyExe`" -m $apiTarget --port 8001"
-    Start-Process cmd -ArgumentList "/k $apiCmd"
-
     Write-Host ""
     Write-Host "--------------------------------------------------"
-    Write-Host " 全ての準備が整いました！"
-    Write-Host " 5秒後にブラウザを自動起動します..."
+    Write-Host " Gradio エンジンを読み込み中... (初回は数分かかります)"
+    Write-Host " ブラウザは30秒後に自動起動します。"
     Write-Host "--------------------------------------------------"
-    Start-Sleep -Seconds 5
-    # 無条件でブラウザを起動
+    Start-Sleep -Seconds 30
     Start-Process "http://localhost:3001"
 } catch {
     Write-Host "[!] エラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
