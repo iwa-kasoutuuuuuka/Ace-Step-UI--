@@ -39,7 +39,7 @@ try {
     $nodeCmd = "cd /d `"$serverPath`" && `"$nodeExe`" dist/index.js"
     Start-Process cmd -ArgumentList "/k $nodeCmd"
 
-    # --- API 起動 (8001) - 余計な引数(--enable-api)を削除 ---
+    # --- API 起動 (8001) ---
     $apiTarget = "acestep.api_server"
     $apiCmd = "cd /d `"$aceStepPath`" && `"$pyExe`" -m $apiTarget --port 8001"
     Start-Process cmd -ArgumentList "/k $apiCmd"
@@ -47,12 +47,11 @@ try {
     Write-Host ""
     Write-Host "--------------------------------------------------"
     Write-Host " 全ての準備が整いました！"
-    Write-Host " ブラウザで曲の生成をお楽しみください。"
+    Write-Host " 5秒後にブラウザを自動起動します..."
     Write-Host "--------------------------------------------------"
     Start-Sleep -Seconds 5
-    if (-not (Get-Process msedge, chrome, firefox -ErrorAction SilentlyContinue)) {
-        Start-Process "http://localhost:3001"
-    }
+    # 無条件でブラウザを起動
+    Start-Process "http://localhost:3001"
 } catch {
     Write-Host "[!] エラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
     Read-Host "Enterで終了"
