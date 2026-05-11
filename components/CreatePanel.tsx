@@ -160,8 +160,8 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
 
   // Common
   const [instrumental, setInstrumental] = useState(false);
-  const [vocalLanguage, setVocalLanguage] = useState('en');
-  const [vocalGender, setVocalGender] = useState<'male' | 'female' | ''>('');
+  const [vocalLanguage, setVocalLanguage] = useState('ja');
+  const [vocalGender, setVocalGender] = useState<'male' | 'female' | ''>('female');
 
   // Music Parameters
   const [bpm, setBpm] = useState(0);
