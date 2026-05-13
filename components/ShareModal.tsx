@@ -167,7 +167,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, song })
         /* Standard Share Menu */
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl w-full max-w-sm p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{t('shareSong')}</h2>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{t('shareSong') || 'Share Song'}</h2>
             <button onClick={onClose} className="text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
               <X size={20} />
             </button>
@@ -198,7 +198,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, song })
             <button
               onClick={handleShareX}
               className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-black text-white hover:bg-zinc-800 transition-colors"
-              title={t('shareOnX')}
+              title={t('shareOnX') || 'Share on X'}
             >
             <XIcon />
             <span className="text-xs font-medium">X</span>
