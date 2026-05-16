@@ -22,6 +22,9 @@ export async function getGradioClient(): Promise<Client> {
       return client;
     } catch (error) {
       console.error(`[Gradio] Failed to connect to ${config.acestep.apiUrl}:`, error);
+      // We can't import writeErrorLog directly here to avoid circular dependencies
+      // but we can log to a shared file or pass it in.
+      // For now, let's just make sure it's visible in console.
       throw error;
     } finally {
       connectionPromise = null;
@@ -54,7 +57,7 @@ export async function isGradioAvailable(): Promise<boolean> {
   for (const url of candidates) {
     try {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 5000);
+      const timer = setTimeout(() => controller.abort(), 30000);
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timer);
       if (response.ok || response.status < 500) return true;

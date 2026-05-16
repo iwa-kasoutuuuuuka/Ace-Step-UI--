@@ -1,6 +1,6 @@
 import { writeFile, mkdir, copyFile, rm, readFile } from 'fs/promises';
 import { spawn, execSync } from 'child_process';
-import { existsSync } from 'fs';
+import { existsSync, appendFileSync } from 'fs';
 import path from 'path';
 import { handle_file } from '@gradio/client';
 
@@ -27,15 +27,74 @@ const __dirname = path.dirname(__filename);
 const AUDIO_DIR = path.join(__dirname, '../../public/audio');
 
 const ACESTEP_API = config.acestep.apiUrl;
+const LOG_FILE = path.join(__dirname, '../../data/error.log');
 
-// Resolve ACE-Step path (from env or default relative path)
+/**
+ * Write an error message to a local log file for debugging.
+ */
+function writeErrorLog(context: string, error: any, metadata?: any): void {
+  try {
+    const timestamp = new Date().toISOString();
+    const errorMessage = error instanceof Error ? error.stack || error.message : String(error);
+    const logEntry = `
+[${timestamp}] ${context.toUpperCase()} ERROR
+Message: ${errorMessage}
+${metadata ? `Metadata: ${JSON.stringify(metadata, null, 2)}` : ''}
+--------------------------------------------------------------------------------
+`;
+    appendFileSync(LOG_FILE, logEntry, 'utf-8');
+    console.log(`[ACE-Step] Error logged to ${LOG_FILE}`);
+  } catch (logErr) {
+    console.error('[ACE-Step] Failed to write to log file:', logErr);
+  }
+}
+
+// Resolve ACE-Step path (from env, config file, or common relative paths)
 function resolveAceStepPath(): string {
+  const rootDir = path.resolve(__dirname, '../../../');
+
+  // 1. Check environment variable
   const envPath = process.env.ACESTEP_PATH;
   if (envPath) {
-    return path.isAbsolute(envPath) ? envPath : path.resolve(process.cwd(), envPath);
+    const resolvedEnvPath = path.isAbsolute(envPath) ? envPath : path.resolve(process.cwd(), envPath);
+    if (existsSync(resolvedEnvPath)) {
+      return resolvedEnvPath;
+    }
+    console.warn('[ACE-Step] ACESTEP_PATH from env does not exist, falling back:', resolvedEnvPath);
   }
-  // Default: sibling directory (server/src/services -> ../../../ACE-Step-1.5 = app/ACE-Step-1.5)
-  return path.resolve(__dirname, '../../../ACE-Step-1.5');
+
+  // 2. Check specific portable distribution path (Highest Priority)
+  const portablePath = path.resolve(rootDir, '../ACE-Step-UI-JP-Portable/engine');
+  if (existsSync(portablePath)) {
+    return portablePath;
+  }
+
+  // 3. Check for .acestep_path file created by launch scripts
+  const configPath = path.join(rootDir, '.acestep_path');
+  if (existsSync(configPath)) {
+    try {
+      const savedPath = readFileSync(configPath, 'utf-8').trim();
+      if (savedPath) {
+        return path.isAbsolute(savedPath) ? savedPath : path.resolve(rootDir, savedPath);
+      }
+    } catch (e) {
+      console.warn('[ACE-Step] Failed to read .acestep_path:', e);
+    }
+  }
+
+  // 4. Common sibling locations
+  const candidates = [
+    path.resolve(rootDir, '../ACE-Step-1.5'),
+    path.resolve(rootDir, 'ACE-Step-1.5'),
+  ];
+
+  for (const cand of candidates) {
+    if (existsSync(cand)) {
+      return cand;
+    }
+  }
+
+  return candidates[0];
 }
 
 // Resolve Python path cross-platform (supports venv and portable installations)
@@ -504,30 +563,38 @@ async function processGeneration(
   params: GenerationParams,
   job: ActiveJob,
 ): Promise<void> {
-  job.status = 'running';
-  job.stage = 'Starting generation...';
+  try {
+    job.status = 'running';
+    job.stage = 'Starting generation...';
 
-  // Guard: cover/audio2audio requires a source or audio codes
-  if ((params.taskType === 'cover' || params.taskType === 'audio2audio') && !params.sourceAudioUrl && !params.audioCodes) {
-    job.status = 'failed';
-    job.error = `task_type='${params.taskType}' requires a source audio or audio codes`;
-    return;
-  }
-
-  // Try Gradio first
-  const gradioUp = await isGradioAvailable();
-  if (gradioUp) {
-    try {
-      await processGenerationViaGradio(jobId, params, job);
+    // Guard: cover/audio2audio requires a source or audio codes
+    if ((params.taskType === 'cover' || params.taskType === 'audio2audio') && !params.sourceAudioUrl && !params.audioCodes) {
+      job.status = 'failed';
+      job.error = `task_type='${params.taskType}' requires a source audio or audio codes`;
+      writeErrorLog('Generation Guard', job.error, { jobId, taskType: params.taskType });
       return;
-    } catch (error) {
-      console.error(`Job ${jobId}: Gradio generation failed, trying Python spawn fallback`, error);
-      // Fall through to Python spawn
     }
-  }
 
-  // Fallback: Python spawn
-  await processGenerationViaPython(jobId, params, job);
+    // Try Gradio first
+    const gradioUp = await isGradioAvailable();
+    if (gradioUp) {
+      try {
+        await processGenerationViaGradio(jobId, params, job);
+        return;
+      } catch (error) {
+        console.error(`Job ${jobId}: Gradio generation failed, trying Python spawn fallback`, error);
+        writeErrorLog('Gradio Fallback', error, { jobId, apiUrl: config.acestep.apiUrl });
+        // Fall through to Python spawn
+      }
+    }
+
+    // Fallback: Python spawn
+    await processGenerationViaPython(jobId, params, job);
+  } catch (globalError) {
+    writeErrorLog('Global Generation', globalError, { jobId, params: { prompt: params.prompt?.slice(0, 50), style: params.style } });
+    job.status = 'failed';
+    job.error = globalError instanceof Error ? globalError.message : String(globalError);
+  }
 }
 
 async function processGenerationViaGradio(
@@ -806,7 +873,7 @@ interface PythonResult {
   error?: string;
 }
 
-function runPythonGeneration(scriptArgs: string[], timeoutMs = 1800000): Promise<PythonResult> {
+function runPythonGeneration(scriptArgs: string[], timeoutMs = 7200000): Promise<PythonResult> {
   return new Promise((resolve) => {
     const pythonPath = resolvePythonPath(ACESTEP_DIR);
     const args = [PYTHON_SCRIPT, ...scriptArgs];

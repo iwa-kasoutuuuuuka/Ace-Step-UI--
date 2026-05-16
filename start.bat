@@ -33,7 +33,7 @@ echo Starting ACE-Step UI...
 echo.
 echo Make sure ACE-Step API is running:
 echo   cd path\to\ACE-Step
-echo   uv run acestep-api --port 8001
+echo   uv run acestep\acestep_v15_pipeline.py --port 8001 --init_service --enable-api
 echo.
 echo ==================================
 echo.

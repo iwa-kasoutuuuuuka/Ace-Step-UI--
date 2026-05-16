@@ -185,7 +185,7 @@ export const CreatePanel: React.FC<CreatePanelProps> = ({
   const [thinking, setThinking] = useState(false); // Default false for GPU compatibility
   const [enhance, setEnhance] = useState(false); // AI Enhance: uses LLM to enrich caption & generate metadata
   const [audioFormat, setAudioFormat] = useState<'mp3' | 'flac'>('mp3');
-  const [inferenceSteps, setInferenceSteps] = useState(12);
+  const [inferenceSteps, setInferenceSteps] = useState(4);
   const [inferMethod, setInferMethod] = useState<'ode' | 'sde'>('ode');
   const [lmBackend, setLmBackend] = useState<'pt' | 'vllm'>('pt');
   const [lmModel, setLmModel] = useState(() => {
